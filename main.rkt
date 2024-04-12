@@ -2,7 +2,7 @@
 ;; Laboratorio 1: Scheme
 ;; Estudiante: Joaquín Pozo Garrao
 
-;: Req 1: Funcion constructora de estaciones de metro - TDA Constructor
+;: Req 2: Funcion constructora de estaciones de metro - TDA Constructor
 ;: DOM: id (int) X nombre (str) X tipo (str) X tiempo-parada (int)
 ;: REC: station (list)
 (define station
@@ -23,7 +23,7 @@
 (define e10 (station 11 "Los Dominicos" "t" 60))
 ;e0 e1 e2 e3 e4 e5 e6 e7 e8 e9 e10
 
-;: Req 2: Funcion constructora de enlaces entre dos estaciones de metro - TDA Constructor
+;: Req 3: Funcion constructora de enlaces entre dos estaciones de metro - TDA Constructor
 ;: DOM: point1 (station) X point2 (station) X distance (positive-number) X cost (positive-number U {0}). 
 ;: REC: section (list)
 
@@ -31,7 +31,7 @@
   (lambda (point1 point2 distance cost)
     (list point1 point2 distance cost)))
 
-;creando una nueva estación
+;creando una nueva sección
 (define s0 (section e0 e1 2 50))
 (define s1 (section e1 e2 2.5 55))
 (define s2 (section e2 e3 1.5 30))
@@ -44,7 +44,7 @@
 (define s9 (section e6 e10 15 250))
 ;s0 s1 s2 s3 s4 s5 s6 s7 s8 s9
 
-;: Req 3: Funcion constructora de una linea de metro - TDA Constructor
+;: Req 4: Funcion constructora de una linea de metro - TDA Constructor
 ;: DOM: id (int) X name (string) X rail-type (string) X section* (* señala que se pueden agregar 0 o más tramos)
 ;: REC: line (list)
 
@@ -54,7 +54,23 @@
 
 (define l0 (line 0 "Línea 0" "UIC 60 ASCE"))
 (define l1 (line 1 "Línea 1" "100 R.E." s0 s1 s2 s3 s5 s7 s8 s9))
-l0 l1
+;l0 l1
+
+;; TDA: SELECTOR - Funcion adicional que permite obtener todas las secciones de una linea
+;; DOM: line (line)
+;; REC: sections (sections)
+(define get-line-sections (lambda (line) (last line)))
+(define a (get-line-sections l1))
+;; TDA: SELECTOR - Funcion adicional que permite obtener todas las secciones de una linea
+;; DOM: line (line)
+;; REC: sections (sections)
+(define get-section-distance (lambda (section) (third section)))
+;; Req 5: Funcion que permite determinar el largo total de una línea (en la unidad de medida expresada en cada tramo)
+;; DOM: line (line)
+;; REC: positive-number (int)
+(define line-length (lambda (line) (apply + (map (lambda (x) (get-section-distance x)) (get-line-sections line)))))
+;(line-length l1)
+
 
 
 
