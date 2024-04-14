@@ -60,7 +60,6 @@
 ;; DOM: line (line)
 ;; REC: sections (sections)
 (define get-line-sections (lambda (line) (last line)))
-(define a (get-line-sections l1))
 ;; TDA: SELECTOR - Funcion adicional que permite obtener todas las secciones de una linea
 ;; DOM: line (line)
 ;; REC: sections (sections)
@@ -69,7 +68,21 @@
 ;; DOM: line (line)
 ;; REC: positive-number (int)
 (define line-length (lambda (line) (apply + (map (lambda (x) (get-section-distance x)) (get-line-sections line)))))
-;(line-length l1)
+
+;; Req 6: Función que permite determinar el trayecto entre una estación origen y una final.
+;; DOM: line (line) X station1-name (String) X station2-name (String)
+;; REC: positive-number (int)
+(define get-station1-name (lambda (section) (first (second section))))
+(define get-station2-name (lambda (section) (second (second section))))
+(define section-contains-stations? (lambda (section station1-name station2-name)
+                                     (and
+                                      (eq? (get-station1-name section) station1-name)
+                                      (eq? (get-station2-name section) station2-name))))
+(define line-section-length (lambda (line station1-name station2-name)
+                              (map (lambda (x) (get-station1-name x)) (get-line-sections line))))
+(line-section-length l1 "USACH" "Estación Central")
+
+
 
 
 
