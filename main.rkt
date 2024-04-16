@@ -42,45 +42,55 @@
 (define s7 (section e0 e7 3 0))
 (define s8 (section e0 e9 7 100))
 (define s9 (section e6 e10 15 250))
-;s0 s1 s2 s3 s4 s5 s6 s7 s8 s9
 
 ;: Req 4: Funcion constructora de una linea de metro - TDA Constructor
 ;: DOM: id (int) X name (string) X rail-type (string) X section* (* señala que se pueden agregar 0 o más tramos)
 ;: REC: line (list)
-
 (define line
   (lambda (id name rail-type . sections)
     (list id name rail-type sections)))
 
 (define l0 (line 0 "Línea 0" "UIC 60 ASCE"))
 (define l1 (line 1 "Línea 1" "100 R.E." s0 s1 s2 s3 s5 s7 s8 s9))
-;l0 l1
-
 ;; TDA: SELECTOR - Funcion adicional que permite obtener todas las secciones de una linea
 ;; DOM: line (line)
 ;; REC: sections (sections)
 (define get-line-sections (lambda (line) (last line)))
-;; TDA: SELECTOR - Funcion adicional que permite obtener todas las secciones de una linea
+(get-line-sections l1)
+;; TDA: SELECTOR - Funcion adicional que permite obtener la distancia de una sección
 ;; DOM: line (line)
 ;; REC: sections (sections)
 (define get-section-distance (lambda (section) (third section)))
 ;; Req 5: Funcion que permite determinar el largo total de una línea (en la unidad de medida expresada en cada tramo)
 ;; DOM: line (line)
 ;; REC: positive-number (int)
-(define line-length (lambda (line) (apply + (map (lambda (x) (get-section-distance x)) (get-line-sections line)))))
-
-;; Req 6: Función que permite determinar el trayecto entre una estación origen y una final.
+(define line-length (lambda (line) (apply + (map (lambda (section) (get-section-distance section)) (get-line-sections line)))))
+;; TDA: SELECTOR - Funcion adicional que permite obtener el nombre de una seccion
+;; DOM: seccion (section)
+;; REC: nombre-seccion (string)
+(define get-station1-name (lambda (section) (second (first section))))
+;; TDA: SELECTOR - Funcion adicional que permite obtener el nombre de una seccion
+;; DOM: seccion (section)
+;; REC: nombre-seccion (string)
+(define get-station2-name (lambda (section) (second (second section))))
+;; TDA: VALIDADOR - Funcion adicional que permite verificar si existen dos estaciones dentro de una sección
+;; DOM: nombre-estación1 (string) X nombre-estación2 (string)
+;; REC: #t | #f
+(define section-contains-stations?
+  (lambda (station1-name station2-name)
+    (lambda (section)
+      (and
+        (eq? (get-station1-name section) station1-name)
+        (eq? (get-station2-name section) station2-name)))))
+;; Req 6: Función que permite determinar el trayecto entre una estación origen y una final
 ;; DOM: line (line) X station1-name (String) X station2-name (String)
 ;; REC: positive-number (int)
-(define get-station1-name (lambda (section) (first (second section))))
-(define get-station2-name (lambda (section) (second (second section))))
-(define section-contains-stations? (lambda (section station1-name station2-name)
-                                     (and
-                                      (eq? (get-station1-name section) station1-name)
-                                      (eq? (get-station2-name section) station2-name))))
-(define line-section-length (lambda (line station1-name station2-name)
-                              (map (lambda (x) (get-station1-name x)) (get-line-sections line))))
-(line-section-length l1 "USACH" "Estación Central")
+(define line-section-length
+  (lambda (line station1-name station2-name)
+    (get-section-distance (first (filter (section-contains-stations? station1-name station2-name) (get-line-sections line))))))
+
+(line-section-length l1 "USACH" "Cochera")
+
 
 
 
