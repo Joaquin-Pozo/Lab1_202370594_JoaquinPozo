@@ -104,9 +104,23 @@
             0
             (+ (get-section-cost (first sections)) (intern-line-cost (cdr sections))))))
     (intern-line-cost (get-line-sections line))))
-(line-cost l1)
+;(line-cost l1)
 
-
+;; Req 8: Función que permite determinar el costo de un trayecto entre una estación origen y una final. Resolver con recursividad de cola.
+;; DOM: line (line) X station1-name (String) X station2-name (String)
+;; REC: positive-number U {0}
+(define line-section-cost
+  (lambda (line station1-name station2-name)
+    (define intern-line-section-cost
+      (lambda (sections station1-name station2-name cost)
+        (cond
+          [(null? sections) cost]
+          [else
+           (if ((section-contains-stations? station1-name station2-name) (first sections))
+               (intern-line-section-cost (cdr sections) station1-name station2-name (+ cost (get-section-cost (first sections))))
+               (intern-line-section-cost (cdr sections) station1-name station2-name cost))])))
+    (intern-line-section-cost (get-line-sections line) station1-name station2-name 0)))
+(line-section-cost l1 "USACH" "San Pablo")
 
 
 
