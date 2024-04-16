@@ -88,9 +88,23 @@
 (define line-section-length
   (lambda (line station1-name station2-name)
     (get-section-distance (first (filter (section-contains-stations? station1-name station2-name) (get-line-sections line))))))
-
-(line-section-length l1 "USACH" "Cochera")
-
+;; TDA: SELECTOR - Funcion adicional que permite obtener el costo de una seccion
+;; DOM: seccion (section)
+;; REC: costo (int)
+(define get-section-cost
+  (lambda (section) (last section)))
+;; Req 7: Función que permite determinar el costo total (monetario) de recorrer una línea. Resolver con recursividad natural.
+;; DOM: line (line)
+;; REC: positive-number U {0}
+(define line-cost
+  (lambda (line)
+    (define intern-line-cost
+      (lambda (sections)
+        (if (null? sections)
+            0
+            (+ (get-section-cost (first sections)) (intern-line-cost (cdr sections))))))
+    (intern-line-cost (get-line-sections line))))
+(line-cost l1)
 
 
 
