@@ -56,7 +56,7 @@
 ;; DOM: line (line)
 ;; REC: sections (sections)
 (define get-line-sections (lambda (line) (last line)))
-(get-line-sections l1)
+;(get-line-sections l1)
 ;; TDA: SELECTOR - Funcion adicional que permite obtener la distancia de una sección
 ;; DOM: line (line)
 ;; REC: sections (sections)
@@ -120,8 +120,28 @@
                (intern-line-section-cost (cdr sections) station1-name station2-name (+ cost (get-section-cost (first sections))))
                (intern-line-section-cost (cdr sections) station1-name station2-name cost))])))
     (intern-line-section-cost (get-line-sections line) station1-name station2-name 0)))
-(line-section-cost l1 "USACH" "San Pablo")
+;(line-section-cost l1 "USACH" "San Pablo")
 
+;; Req 9: Función que permite añadir tramos a una línea
+;; DOM: line (line) X section (section)
+;; REC: line
 
+(define get-section-id-station1 (lambda (section) (first (first section))))
+(define get-section-id-station2 (lambda (section) (first (second section))))
+
+(define line-add-section
+  (lambda (line section)
+    (define intern-line-add-section
+      (lambda (sections section)
+        (cond
+          [(null? sections) (list section)]
+          [else
+           (cons (car sections) (intern-line-add-section (cdr sections) section))])))
+    (intern-line-add-section (get-line-sections line) section)))
+
+(define e11 (station 12 "Baquedano" "t" 40))
+(define s10 (section e10 e11 5 20))
+
+(line-add-section l1 s10)
 
 
