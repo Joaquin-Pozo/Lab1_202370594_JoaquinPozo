@@ -2,7 +2,7 @@
 ;; Laboratorio 1: Scheme
 ;; Estudiante: Joaquín Pozo Garrao
 
-(require "TDA_station.rkt" "TDA_line.rkt" "TDA_section.rkt" "TDA_pcar.rkt" "TDA_train.rkt")
+(require "TDA_station.rkt" "TDA_line.rkt" "TDA_section.rkt" "TDA_pcar.rkt")
 
 ;: Req 2: Funcion constructora de estaciones de metro - TDA Constructor
 ;: DOM: id (int) X nombre (str) X tipo (str) X tiempo-parada (int)
@@ -160,42 +160,15 @@
 ;; DOM: id (int) X maker (string) X rail-type (string) X speed (positive number) X station-stay-time (positive number U {0}) X pcar*
 ;; REC: train
 
-(define make-train
+(define train
   (lambda (id maker rail-type speed station-stay-time . pcar)
-    ;(display "pcars:")
-    ;(newline)
-    ;(display pcar)
-    ;(newline)
-    (if (contains-list? (car pcar)) ;manejo los casos en los que uso train-add-car y recibo una lista de listas como argumento de pcar
-        (cond
-          [(null? (car pcar)) (list id maker rail-type speed station-stay-time (car pcar))]
-          [(and
-            (same-models? (get-pcar-models (car pcar)))
-            (correct-order? (get-pcar-types (car pcar)))) (list id maker rail-type speed station-stay-time (car pcar))]
-          [else (list id maker rail-type speed station-stay-time null)])
-        (cond
-          [(null? pcar) (list id maker rail-type speed station-stay-time pcar)]
-          [(and
-            (same-models? (get-pcar-models pcar))
-            (correct-order? (get-pcar-types pcar))) (list id maker rail-type speed station-stay-time pcar)]
-          [else (list id maker rail-type speed station-stay-time null)]))))
+    (cond
+      [(null? pcar) (list id maker rail-type speed station-stay-time pcar)]
+      [(and
+        (same-models? (get-pcar-models pcar))
+        (correct-order? (get-pcar-types pcar))) (list id maker rail-type speed station-stay-time pcar)]
+      [else (list id maker rail-type speed station-stay-time null)])))
 
-(define t2 (make-train 2 "CAF" "UIC 60 ASCE" 60 1.5 pc1 pc0 pc7 pc8))
+(define t2 (train 2 "CAF" "UIC 60 ASCE" 60 1.5 pc1 pc0 pc7 pc8))
 t2
-
-;; Req 13: Función que permite añadir carros a un tren en una posición dada
-;; DOM: train (train) X pcar (pcar) X position (positive-integer U {0})
-;; REC: train
-(define train-add-car
-  (lambda (train pcar position)
-    (make-train (get-train-id train)
-                (get-train-maker train)
-                (get-train-rail-type train)
-                (get-train-speed train)
-                (get-train-station-stay-time train)
-                (add-car (get-pcars train) pcar position))))
-
-
-
-
 
