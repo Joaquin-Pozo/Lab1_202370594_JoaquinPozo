@@ -15,7 +15,7 @@
 (define station
   (lambda (id name type stop-time)
     (list id name type stop-time)))
-
+#|
 ;creando una nueva estación
 (define e0 (station 1 "USACH" c 30))
 (define e1 (station 2 "Estación Central" c 45))
@@ -29,7 +29,7 @@
 (define e9 (station 10 "San Pablo" t 40))
 (define e10 (station 11 "Los Dominicos" t 60))
 ;e0 e1 e2 e3 e4 e5 e6 e7 e8 e9 e10
-
+|#
 ;: Req 3: Funcion constructora de enlaces entre dos estaciones de metro - TDA Constructor
 ;: DOM: point1 (station) X point2 (station) X distance (positive-number) X cost (positive-number U {0}). 
 ;: REC: section (list)
@@ -37,7 +37,7 @@
 (define section
   (lambda (point1 point2 distance cost)
     (list point1 point2 distance cost)))
-
+#|
 ;creando una nueva sección
 (define s0 (section e0 e1 2 50))
 (define s1 (section e1 e2 2.5 55))
@@ -49,16 +49,17 @@
 (define s7 (section e0 e7 3 0))
 (define s8 (section e0 e9 7 100))
 (define s9 (section e6 e10 15 250))
-
+|#
 ;: Req 4: Funcion constructora de una linea de metro - TDA Constructor
 ;: DOM: id (int) X name (string) X rail-type (string) X section* (* señala que se pueden agregar 0 o más tramos)
 ;: REC: line (list)
 (define line
   (lambda (id name rail-type . sections)
     (list id name rail-type sections)))
-
+#|
 (define l0 (line 0 "Línea 0" "UIC 60 ASCE"))
 (define l1 (line 1 "Línea 1" "100 R.E." s0 s1 s2 s3 s5 s7 s8 s9))
+|#
 ;; Req 5: Funcion que permite determinar el largo total de una línea (en la unidad de medida expresada en cada tramo)
 ;; DOM: line (line)
 ;; REC: positive-number (int)
@@ -118,8 +119,10 @@
            (cons (car sections) (intern-line-add-section (cdr sections) section))])))
     (intern-line-add-section (get-line-sections line) section)))
 
+#|
 (define e11 (station 12 "Baquedano" "t" 40))
 (define s10 (section e10 e11 5 20))
+|#
 
 ;(line-add-section l1 s10)
 
@@ -144,6 +147,7 @@
     (list id capacity model type)))
 
 ;creando carros
+#|
 (define pc0 (pcar 0 100 "NS-74" ct))
 (define pc1 (pcar 1 100 "NS-74" tr))
 (define pc2 (pcar 2 150 "NS-74" tr))
@@ -155,47 +159,109 @@
 (define pc8 (pcar 5 100 "NS-74" tr))
 (define pc9 (pcar 6 100 "NS-74" ct))
 ;pc0 pc1 pc2 pc3 pc4 pc5 pc6
-
+|#
 ;; Req 12: Función que permite crear un tren o convoy
 ;; DOM: id (int) X maker (string) X rail-type (string) X speed (positive number) X station-stay-time (positive number U {0}) X pcar*
 ;; REC: train
 
-(define make-train
+(define train
   (lambda (id maker rail-type speed station-stay-time . pcar)
     ;(display "pcars:")
     ;(newline)
     ;(display pcar)
     ;(newline)
-    (if (contains-list? (car pcar)) ;manejo los casos en los que uso train-add-car y recibo una lista de listas como argumento de pcar
-        (cond
-          [(null? (car pcar)) (list id maker rail-type speed station-stay-time (car pcar))]
-          [(and
-            (same-models? (get-pcar-models (car pcar)))
-            (correct-order? (get-pcar-types (car pcar)))) (list id maker rail-type speed station-stay-time (car pcar))]
-          [else (list id maker rail-type speed station-stay-time null)])
-        (cond
-          [(null? pcar) (list id maker rail-type speed station-stay-time pcar)]
-          [(and
-            (same-models? (get-pcar-models pcar))
-            (correct-order? (get-pcar-types pcar))) (list id maker rail-type speed station-stay-time pcar)]
-          [else (list id maker rail-type speed station-stay-time null)]))))
+    (cond
+      [(null? pcar) (list id maker rail-type speed station-stay-time pcar)]
+      [(and (same-models? (get-pcar-models pcar)) (correct-order? (get-pcar-types pcar)))
+       (list id maker rail-type speed station-stay-time pcar)]
+      [else (list id maker rail-type speed station-stay-time null)])))
 
-(define t2 (make-train 2 "CAF" "UIC 60 ASCE" 60 1.5 pc1 pc0 pc7 pc8))
+#|
+(define t2 (train 2 "CAF" "UIC 60 ASCE" 60 1.5 pc1 pc0 pc3 pc2))
 t2
+(define t1 (train 1 "CAF" "UIC 60 ASCE" 70 2))
+t1
+|#
+
 
 ;; Req 13: Función que permite añadir carros a un tren en una posición dada
 ;; DOM: train (train) X pcar (pcar) X position (positive-integer U {0})
 ;; REC: train
 (define train-add-car
   (lambda (train pcar position)
-    (make-train (get-train-id train)
-                (get-train-maker train)
-                (get-train-rail-type train)
-                (get-train-speed train)
-                (get-train-station-stay-time train)
-                (add-car (get-pcars train) pcar position))))
+    (list (get-train-id train)
+          (get-train-maker train)
+          (get-train-rail-type train)
+          (get-train-speed train)
+          (get-train-station-stay-time train)
+          (add-car (get-pcars train) pcar position))))
+;; Req 14: Función que permite eliminar un carro desde el convoy
+;; DOM: train (train) X position (positive-integer U {0})
+;; REC: train
+(define train-remove-car
+  (lambda (train position)
+    (list (get-train-id train)
+          (get-train-maker train)
+          (get-train-rail-type train)
+          (get-train-speed train)
+          (get-train-station-stay-time train)
+          (remove-car (get-pcars train) position))))
+;; Req 15: Función que permite determinar si un elemento es un tren válido, esto es,
+;; si el elemento tiene la estructura de tren y los carros que lo conforman son compatibles (mismo modelo)
+;; y tienen una disposición coherente con carros terminales (tr) en los extremos y centrales (ct) en medio del convoy
+;; DOM: train
+;; REC: boolean
+(define train?
+  (lambda (train)
+    (if (null? (get-pcars train))
+        #f
+        (if (null? (cdr (get-pcars train)))
+            #f
+            (if (and (eq? (length train) 6)
+                     (same-models? (get-pcar-models (get-pcars train)))
+                     (correct-order? (get-pcar-types (get-pcars train))))
+                #t
+                #f)))))
+;; Req 16: Función que permite determinar la capacidad máxima de pasajeros del tren
+;; DOM: train
+;; REC: positive-number U {0}
+(define train-capacity
+  (lambda (train)
+    (define fn-interna
+      (lambda (pcars)
+        (cond
+          [(null? pcars) 0]
+          [(+ (get-pcar-capacity (car pcars)) (fn-interna (cdr pcars)))])))
+    (fn-interna (get-pcars train))))
 
+;; Req 17: Función que permite crear un conductor cuya habilitación de conducción depende del fabricante de tren (train-maker)
+;; DOM: id (int) X nombre (string) X train-maker (string)
+;; REC: driver
+(define driver
+  (lambda (id name train-maker)
+    (list id name train-maker)))
+;; Req 18: Función que permite crear una red de metro
+;; DOM: id (int) X nombre (string)
+;; REC: subway
+(define subway
+  (lambda (id name)
+    (list id name)))
+;; Req 19: Función que permite añadir trenes a una red de metro
+;; DOM: sub (subway) X train+ (pueden ser 1 o más trenes)
+;; REC: subway
+(define subway-add-train
+  (lambda (sub . train+)
+    (define fn-interna
+      (lambda (sub train+ acc)
+        (cond
+          [(null? train+) (list sub (reverse acc))]
+          [else (fn-interna sub (cdr train+) (cons (car train+) acc))])))
+    (fn-interna sub train+ null)))
+;; Req 20: Función que permite añadir líneas a una red de metro
+;; DOM: sub (subway) X line+ (pueden ser 1 o más líneas)
+;; REC: subway
+(define subway-add-line
+  (lambda (sub . line+)
+    (apply append sub (list line+))))
 
-
-
-
+;; arreglar add-section a lineas, no esta funcionando bien

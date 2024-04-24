@@ -1,5 +1,5 @@
 #lang scheme
-(provide get-pcars get-train-id get-train-maker get-train-rail-type get-train-speed get-train-station-stay-time add-car contains-list?)
+(provide get-pcars get-train-id get-train-maker get-train-rail-type get-train-speed get-train-station-stay-time add-car remove-car)
 
 ;; TDA: SELECTOR - Funcion adicional que permite obtener los carros de un tren
 ;; DOM: train (train)
@@ -25,7 +25,6 @@
 ;; DOM: train (train)
 ;; REC: station-stay-time (integer)
 (define get-train-station-stay-time (lambda (train) (fifth train)))
-
 ;; TDA: Modificador - Funcion adicional que permite agregar un carro en una posicion dada (indice)
 ;; DOM: lista de carros (list pcars) X carro a agregar (pcar) X posicion (integer)
 ;; REC: lista de carros actualizada (list pcars)
@@ -36,13 +35,15 @@
       [(= i position) (fn-interna (cdr pcars) pcar position (+ i 1) (append acc (list pcar) (list (car pcars))))]
       [else (fn-interna (cdr pcars) pcar position (+ i 1) (append acc (list (car pcars))))]))
   (fn-interna pcars pcar position 0 null))
+;; TDA: Modificador - Funcion adicional que permite agregar un carro en una posicion dada (indice)
+;; DOM: lista de carros (list pcars) X carro a agregar (pcar) X posicion (integer)
+;; REC: lista de carros actualizada (list pcars)
+(define (remove-car pcars position)
+  (define (fn-interna pcars position i acc)
+    (cond
+      [(null? pcars) acc]
+      [(= i position) (fn-interna (cdr pcars) position (+ i 1) acc)]
+      [else (fn-interna (cdr pcars) position (+ i 1) (append acc (list (car pcars))))]))
+  (fn-interna pcars position 0 null))
 
-;; TDA: Verificador - Funcion adicional que permite verificar si tengo una lista de listas
-;; DOM: lista de pcars (list pcars)
-;; REC: true or false (boolean)
-(define (contains-list? lst)
-  (cond
-    [(null? lst) #f]
-    [(list? (car lst)) #t]
-    [else (contains-list? (cdr lst))]))
 
