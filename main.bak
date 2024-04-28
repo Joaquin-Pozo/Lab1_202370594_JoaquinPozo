@@ -47,22 +47,20 @@
            (fn-interna (cdr line-sections) station1-name station2-name (+ acc (get-section-distance (get-first-line-section line-sections))) (+ indicador 1))]
           [(and (equal? (get-station-name (get-station2 (get-first-line-section line-sections))) station2-name) (eq? indicador 1))
            (fn-interna (cdr line-sections) station1-name station2-name (+ acc (get-section-distance (get-first-line-section line-sections))) (- indicador 1))]
-          [(eq? indicador 1)
-           (fn-interna (cdr line-sections) station1-name station2-name (+ acc (get-section-distance (get-first-line-section line-sections))) indicador)]
-          [else
-           (fn-interna (cdr line-sections) station1-name station2-name acc indicador)])))
+          [(eq? indicador 1) (fn-interna (cdr line-sections) station1-name station2-name (+ acc (get-section-distance (get-first-line-section line-sections))) indicador)]
+          [else (fn-interna (cdr line-sections) station1-name station2-name acc indicador)])))
     (fn-interna (get-line-sections line) station1-name station2-name 0 0)))
 ;; Req 7: Función que permite determinar el costo total (monetario) de recorrer una línea. Resolver con recursividad natural.
 ;; DOM: line (line)
 ;; REC: positive-number U {0}
 (define line-cost
   (lambda (line)
-    (define fn-interna
-      (lambda (line-sections)
-        (if (null? line-sections)
+    (define intern-line-cost
+      (lambda (sections)
+        (if (null? sections)
             0
-            (+ (get-section-cost (get-first-line-section line-sections)) (fn-interna (cdr line-sections))))))
-    (fn-interna (get-line-sections line))))
+            (+ (get-section-cost (first sections)) (intern-line-cost (cdr sections))))))
+    (intern-line-cost (get-line-sections line))))
 ;; Req 8: Función que permite determinar el costo de un trayecto entre una estación origen y una final. Resolver con recursividad de cola.
 ;; DOM: line (line) X station1-name (String) X station2-name (String)
 ;; REC: positive-number U {0}
@@ -79,25 +77,35 @@
            (fn-interna (cdr line-sections) station1-name station2-name (+ acc (get-section-cost (get-first-line-section line-sections))) (+ indicador 1))]
           [(and (equal? (get-station-name (get-station2 (get-first-line-section line-sections))) station2-name) (eq? indicador 1))
            (fn-interna (cdr line-sections) station1-name station2-name (+ acc (get-section-cost (get-first-line-section line-sections))) (- indicador 1))]
-          [(eq? indicador 1)
-           (fn-interna (cdr line-sections) station1-name station2-name (+ acc (get-section-cost (get-first-line-section line-sections))) indicador)]
-          [else
-           (fn-interna (cdr line-sections) station1-name station2-name acc indicador)])))
+          [(eq? indicador 1) (fn-interna (cdr line-sections) station1-name station2-name (+ acc (get-section-cost (get-first-line-section line-sections))) indicador)]
+          [else (fn-interna (cdr line-sections) station1-name station2-name acc indicador)])))
     (fn-interna (get-line-sections line) station1-name station2-name 0 0)))
-;; Req 9: Función que permite añadir tramos a una línea. Resolver con recursividad natural.
+;; Req 9: Función que permite añadir tramos a una línea
 ;; DOM: line (line) X section (section)
-;; REC: line (line)
+;; REC: line
+
+;; crear funcion que verifique si un tramo está duplicado
+;; verificar si el nombre de la estacion y el id no esten duplicados
+;; (member "nombre-nueva-seccion"())
+(define get-section-id-station1 (lambda (section) (first (first section))))
+(define get-section-id-station2 (lambda (section) (first (second section))))
+
 (define line-add-section
   (lambda (line section)
-    (list (get-line-id line)
-          (get-line-name line)
-          (get-line-rail-type line)
-          (fn-add-section (get-line-sections line) section))))
+    (define intern-line-add-section
+      (lambda (sections section)
+        (cond
+          [(null? sections) (list section)]
+          [else
+           (cons (car sections) (intern-line-add-section (cdr sections) section))])))
+    (intern-line-add-section (get-line-sections line) section)))
+
 ;; Req 10: Función que permite determinar si un elemento cumple con las restricciones señaladas en apartados anteriores en
 ;; relación a las estaciones y tramos para poder conformar una línea. Ocupar un acumulador
 ;; DOM: line (line)
 ;; REC: boolean
-
+;; (line? l0)
+;; (line? l1)
 
 
 ;; Req 11: Función que permite crear los carros de pasajeros que conforman un convoy. Los carros pueden ser de
@@ -230,6 +238,9 @@ t1
   (lambda (sub . line+)
     (apply append sub (list line+))))
 
+;; arreglar add-section a lineas, no esta funcionando bien
+
+
 
 ;Estaciones L1 simplificada metro santiago
 (define e0 (station 0 "San Pablo" t 90))
@@ -272,14 +283,13 @@ t1
 (define s8 (section e8 e9 4.5 17))
 (define s9 (section e9 e10 4.7 18))
 (define s10 (section e10 e11 4.3 17))
-(define s11 (section e11 e12 3.8 12))
+(define s11 (section  e11 e12 3.8 12))
 (define s12 (section e12 e13 4.5 17))
 (define s13 (section e13 e14 4.7 18))
 (define s14 (section e14 e15 4.3 17))
 (define s15 (section e15 e16 4.2 17))
 ;enlace cochera
 (define s16 (section e1 e17 3.8 12))
-
 
 ;Tramos Línea 2, línea circular
 (define s17 (section e18 e19 4 15))
@@ -289,7 +299,7 @@ t1
 (define s21 (section e22 e10 4.2 16))
 (define s22 (section e10 e23 4.2 16))
 (define s23 (section e23 e24 4.2 16))
-(define s24 (section e24 e16 28 90));excepcion
+(define s24 (section e24 e18 28 90));excepcion
 
 ;Creación de Línea 1 con todos los tramos
 (define l1 (line 1 "Línea 1" "UIC 60 ASCE" s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 s14 s15))
@@ -303,6 +313,7 @@ l1
 (line-section-length l1 "San Pablo" "Las Rejas")   ;respuesta es 9.5s
 (line-section-cost l1 "San Pablo" "Las Rejas")     ;respuesta es 39
 
+#|
 
 ;añadiendo tramos a l2
 (define l2a (line-add-section l2 s17))
@@ -312,17 +323,9 @@ l1
 (define l2e (line-add-section l2d s21))
 (define l2f (line-add-section l2e s22))
 (define l2g (line-add-section l2f s23))
-(define l2h (line-add-section l2g s24)) ; ERROR
-(define l2i (line-add-section l2h s19))  ;dependiendo de como implemente la función, esta operación no añade la estación duplicada.
-;Puede lanzar un “error o excepción” (no un mensaje de error como String, para no comprometer el recorrido de la función) o bien
-;devolver la línea de entrada intacta. En este caso, l2i sería igual a l2h. 
-l2h
-l2i
-(define l2k (line-add-section l2i s10))
-l2k
+(define l2h (line-add-section l2g s24))
+(define l2i (line-add-section l2h s19))  ;dependiendo de como implemente la función, esta operación no añade la estación duplicada. Puede lanzar un “error o excepción” (no un mensaje de error como String, para no comprometer el recorrido de la función) o bien devolver la línea de entrada intacta. En este caso, l2i sería igual a l2h. 
 
-
-#|
 (line? l1)  ;devuelve true
 (line? l2)  ;devuelve false
 (line? l2e)  ;devuelve false

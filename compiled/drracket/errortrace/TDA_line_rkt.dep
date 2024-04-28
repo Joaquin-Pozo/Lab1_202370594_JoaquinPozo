@@ -1,1 +1,1 @@
-("8.12" ta6nt ("111a399d5cf98162c0c29506c28e6de5a0dccc59" . "2713b5b759bff222132168ec390ebd67f9068c02") (collects #"drracket" #"private" #"drracket-errortrace-key.rkt") (collects #"scheme" #"main.rkt") (collects #"scheme" #"runtime-config.rkt"))
+("8.12" ta6nt ("140800a3eaa8b07a33dae4391358e7f6c0857dbf" . "8da25943502895edbf6555d536679af2cbb1c95b") #"C:\\Users\\joaco\\Desktop\\paradigmas\\Lab1_202370594_JoaquinPozo\\TDA_section.rkt" (collects #"drracket" #"private" #"drracket-errortrace-key.rkt") (collects #"scheme" #"main.rkt") (collects #"scheme" #"runtime-config.rkt"))
