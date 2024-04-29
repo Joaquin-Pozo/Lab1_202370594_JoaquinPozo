@@ -2,7 +2,7 @@
 ;; Laboratorio 1: Scheme
 ;; Estudiante: Joaquín Pozo Garrao
 
-(require "TDA_station.rkt" "TDA_line.rkt" "TDA_section.rkt" "TDA_pcar.rkt" "TDA_train.rkt")
+(require "TDA_station.rkt" "TDA_line.rkt" "TDA_section.rkt" "TDA_pcar.rkt" "TDA_train.rkt" "TDA_subway.rkt")
 
 ;: Req 2: Funcion constructora de estaciones de metro - TDA Constructor
 ;: DOM: id (int) X nombre (str) X tipo (str) X tiempo-parada (int)
@@ -96,40 +96,25 @@
 ;; Req 10: Función que permite determinar si un elemento cumple con las restricciones señaladas en apartados anteriores en
 ;; relación a las estaciones y tramos para poder conformar una línea. Ocupar un acumulador
 ;; DOM: line (line)
-;; REC: boolean
-
-
-
+;; REC: #t | #f (boolean)
+(define line?
+  (lambda (line)
+    (if (duplicated-sections? (get-line-sections line))
+        #t
+        #f)))
 ;; Req 11: Función que permite crear los carros de pasajeros que conforman un convoy. Los carros pueden ser de
 ;; tipo terminal (tr) o central (ct)
 ;; DOM: id (int) X capacity (positive integer) X model (string) X type (car-type)
 ;; REC: pcar
-
 (define tr "terminal")
 (define ct "central")
 
 (define pcar
   (lambda (id capacity model type)
     (list id capacity model type)))
-
-;creando carros
-#|
-(define pc0 (pcar 0 100 "NS-74" ct))
-(define pc1 (pcar 1 100 "NS-74" tr))
-(define pc2 (pcar 2 150 "NS-74" tr))
-(define pc3 (pcar 3 100 "NS-74" ct))
-(define pc4 (pcar 4 100 "AS-2014" ct))
-(define pc5 (pcar 5 100 "AS-2014" ct))
-(define pc6 (pcar 6 100 "AS-2016" ct))
-(define pc7 (pcar 4 100 "NS-74" ct))
-(define pc8 (pcar 5 100 "NS-74" tr))
-(define pc9 (pcar 6 100 "NS-74" ct))
-;pc0 pc1 pc2 pc3 pc4 pc5 pc6
-|#
 ;; Req 12: Función que permite crear un tren o convoy
 ;; DOM: id (int) X maker (string) X rail-type (string) X speed (positive number) X station-stay-time (positive number U {0}) X pcar*
 ;; REC: train
-
 (define train
   (lambda (id maker rail-type speed station-stay-time . pcar)
     ;(display "pcars:")
@@ -141,15 +126,6 @@
       [(and (same-models? (get-pcar-models pcar)) (correct-order? (get-pcar-types pcar)))
        (list id maker rail-type speed station-stay-time pcar)]
       [else (list id maker rail-type speed station-stay-time null)])))
-
-#|
-(define t2 (train 2 "CAF" "UIC 60 ASCE" 60 1.5 pc1 pc0 pc3 pc2))
-t2
-(define t1 (train 1 "CAF" "UIC 60 ASCE" 70 2))
-t1
-|#
-
-
 ;; Req 13: Función que permite añadir carros a un tren en una posición dada
 ;; DOM: train (train) X pcar (pcar) X position (positive-integer U {0})
 ;; REC: train
@@ -194,12 +170,11 @@ t1
 (define train-capacity
   (lambda (train)
     (define fn-interna
-      (lambda (pcars)
+      (lambda (train-pcars)
         (cond
-          [(null? pcars) 0]
-          [(+ (get-pcar-capacity (car pcars)) (fn-interna (cdr pcars)))])))
+          [(null? train-pcars) 0]
+          [(+ (get-pcar-capacity (car train-pcars)) (fn-interna (cdr train-pcars)))])))
     (fn-interna (get-pcars train))))
-
 ;; Req 17: Función que permite crear un conductor cuya habilitación de conducción depende del fabricante de tren (train-maker)
 ;; DOM: id (int) X nombre (string) X train-maker (string)
 ;; REC: driver
@@ -212,7 +187,7 @@ t1
 (define subway
   (lambda (id name)
     (list id name)))
-;; Req 19: Función que permite añadir trenes a una red de metro
+;; Req 19: Función que permite añadir trenes a una red de metro. Emplear algún tipo de recursividad.
 ;; DOM: sub (subway) X train+ (pueden ser 1 o más trenes)
 ;; REC: subway
 (define subway-add-train
@@ -223,12 +198,42 @@ t1
           [(null? train+) (list sub (reverse acc))]
           [else (fn-interna sub (cdr train+) (cons (car train+) acc))])))
     (fn-interna sub train+ null)))
-;; Req 20: Función que permite añadir líneas a una red de metro
+;; Req 20: Función que permite añadir líneas a una red de metro. No usar recursividad.
 ;; DOM: sub (subway) X line+ (pueden ser 1 o más líneas)
 ;; REC: subway
 (define subway-add-line
   (lambda (sub . line+)
-    (apply append sub (list line+))))
+    (apply append sub (list (list line+)))))
+;; Req 21: Función que permite añadir conductores a una red de metro. No usar recursividad.
+;; DOM: sub (subway) X driver+ (pueden ser 1 o más conductores)
+;; REC: subway
+(define subway-add-driver
+  (lambda (sub . driver+)
+    (apply append sub (list (list driver+)))))
+;; Req 22: Función que permite expresar una red de metro en un formato String.
+;; DOM: sub (subway)
+;; REC: String
+(define subway->string
+  (lambda (sub)
+    (cond
+      [(null? sub) ""]
+      [(pair? (car sub)) (string-append (subway->string (car sub)) " " (subway->string (cdr sub)))]
+      [(null? (rest sub)) (format "~a" (first sub))]
+      [else (string-append (format "~a" (first sub)) " " (subway->string (rest sub)))])))
+;; Req 23: Función que permite aumentar o reducir los costos de todos los tramos en base a una función especificada por el
+;; usuario que arroja un cambio porcentual en los costos. No usar recursividad. Considere que las funciones de costo deben ser currificadas.
+;; DOM: sub (subway) X function
+;; REC: subway
+(define subway-rise-section-cost
+  (lambda (sub)
+    (list (get-subway-name sub)
+          (get-subway-trains sub)
+          (get-subway-lines sub)
+          (get-subway-drivers sub))))
+
+
+
+
 
 
 ;Estaciones L1 simplificada metro santiago
@@ -316,13 +321,10 @@ l1
 (define l2i (line-add-section l2h s19))  ;dependiendo de como implemente la función, esta operación no añade la estación duplicada.
 ;Puede lanzar un “error o excepción” (no un mensaje de error como String, para no comprometer el recorrido de la función) o bien
 ;devolver la línea de entrada intacta. En este caso, l2i sería igual a l2h. 
-l2h
-l2i
-(define l2k (line-add-section l2i s10))
-l2k
 
 
-#|
+l2e
+
 (line? l1)  ;devuelve true
 (line? l2)  ;devuelve false
 (line? l2e)  ;devuelve false
@@ -404,4 +406,40 @@ l2k
 ;Agregando drivers
 (define sw0c (subway-add-driver sw0b d0 d1 d2 d3))
 
+;sw0c
+;Expresado subway como string
+;(subway->string sw0c)
+;sw0c
+(define sw0d (subway-rise-section-cost sw0c))
+;sw0d
+(get-subway-lines sw0c)
+
+
+#|
+
+
+;Aumentando los costos de las estaciones en un 30%
+(define sw0d (subway-rise-section-cost sw0c (lambda (c) (* c 1.3))))
+
+;Cambiando el tiempo de parada de algunas estaciones
+(define sw0e (subway-set-station-stoptime sw0d "Los Héroes" 180))
+(define sw0f (subway-set-station-stoptime sw0e "San Pablo" 50))
+
+;Asignando trenes a líneas
+(define sw0g (subway-assign-train-to-line sw0f 0 1))
+(define sw0h (subway-assign-train-to-line sw0g 2 2))
+
+;Asignando conductores a trenes
+(define sw0i (subway-assign-driver-to-train sw0h 0 0 "11:00:00" "San Pablo" "Los Héroes"))
+(define sw0j (subway-assign-driver-to-train sw0i 2 2 "12:00:00" "El Llano" "Toesca"))
+
+;preguntando dónde está el tren
+(where-is-train sw0j 0 "11:12:00")  ;Debería estar mas cerca de Las Rejas. Hasta esta hora el tren debería haber recorrido 12km (asumiendo esta unidad), sumando los tiempos de parada en las estaciones
+
+
+;produciendo la ruta que sigue el tren
+(subway-train-path sw0j 0 “11:30:00”)
+
 |#
+
+

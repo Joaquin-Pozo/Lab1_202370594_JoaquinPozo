@@ -1,6 +1,6 @@
 #lang scheme
 (require "TDA_section.rkt")
-(provide get-line-sections get-line-id get-line-name get-line-rail-type get-first-line-section fn-add-section)
+(provide get-line-sections get-line-id get-line-name get-line-rail-type get-first-line-section fn-add-section duplicated-sections?)
 
 ;; TDA: SELECTOR - Funcion adicional que permite obtener todas las secciones de una linea
 ;; DOM: line (line)
@@ -32,3 +32,12 @@
       [(equal? (car line-sections) section)
        (cons (car line-sections) (fn-add-section (cdr line-sections) null))]
       [else (cons (car line-sections) (fn-add-section (cdr line-sections) section))])))
+;; TDA: VALIDADOR - Funcion adicional que permite verificar si una linea tiene secciones duplicadas
+;; DOM: lista de sections (list)
+;; REC: #t | #f (boolean)
+(define duplicated-sections?
+  (lambda (line-sections)
+    (cond
+      [(null? line-sections) #f]
+      [(member (car line-sections) line-sections) #t]
+      [else (duplicated-sections? (cdr line-sections))])))
