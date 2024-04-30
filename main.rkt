@@ -230,12 +230,20 @@
           (get-subway-trains sub)
           (subway-lines-interna (get-subway-lines sub) fn)
           (get-subway-drivers sub))))
-
 ;; Req 24. TDA subway - Modificador: Función que permite modificar el tiempo de parada de una estación. No usar recursividad.
+;; DOM: sub (subway) X stationName (String) X time
+;; REC: subway
+(define subway-set-station-stoptime
+  (lambda (sub station-name time)
+    (list
+     (get-subway-id-and-name sub)
+     (get-subway-trains sub)
+     (subway-lines-interna-2 (get-subway-lines sub) station-name time)
+     (get-subway-drivers sub))))
 
-
-
-
+;; Req 25. TDA subway - Modificador: Función que permite asignar un tren a una línea.
+;; DOM: sub (subway) X trainId (int) X lineID (int)
+;; REC: subway
 
 ;; (subway-train-path force (lazy (fn-subway-train-path arg1 arg2 ...)))
 
@@ -417,21 +425,22 @@ l2e
 ;(get-subway-lines sw0c)
 ;(define sw0d (subway-lines-interna (get-subway-lines sw0c) (lambda (c) (* c 1.3))))
 ;sw0d
-sw0c
-;(get-subway-lines sw0c)
-(define sw0d (subway-rise-section-cost sw0c (lambda (c) (* c 1.3))))
 
+sw0c
+;Aumentando los costos de las estaciones en un 30%
+(define sw0d (subway-rise-section-cost sw0c (lambda (c) (* c 1.3))))
 sw0d
+;Cambiando el tiempo de parada de algunas estaciones
+(define sw0e (subway-set-station-stoptime sw0d "Los Héroes" 180))
+(define sw0f (subway-set-station-stoptime sw0e "San Pablo" 50))
+
+sw0f
 
 #|
 
 
-;Aumentando los costos de las estaciones en un 30%
-(define sw0d (subway-rise-section-cost sw0c (lambda (c) (* c 1.3))))
 
-;Cambiando el tiempo de parada de algunas estaciones
-(define sw0e (subway-set-station-stoptime sw0d "Los Héroes" 180))
-(define sw0f (subway-set-station-stoptime sw0e "San Pablo" 50))
+
 
 ;Asignando trenes a líneas
 (define sw0g (subway-assign-train-to-line sw0f 0 1))
