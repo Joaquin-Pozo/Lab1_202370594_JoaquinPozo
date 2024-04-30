@@ -220,20 +220,24 @@
       [(pair? (car sub)) (string-append (subway->string (car sub)) " " (subway->string (cdr sub)))]
       [(null? (rest sub)) (format "~a" (first sub))]
       [else (string-append (format "~a" (first sub)) " " (subway->string (rest sub)))])))
-;; Req 23: Función que permite aumentar o reducir los costos de todos los tramos en base a una función especificada por el
+;; Req 23. TDA subway - Modificador: Función que permite aumentar o reducir los costos de todos los tramos en base a una función especificada por el
 ;; usuario que arroja un cambio porcentual en los costos. No usar recursividad. Considere que las funciones de costo deben ser currificadas.
 ;; DOM: sub (subway) X function
 ;; REC: subway
 (define subway-rise-section-cost
-  (lambda (sub)
-    (list (get-subway-name sub)
+  (lambda (sub fn)
+    (list (get-subway-id-and-name sub)
           (get-subway-trains sub)
-          (get-subway-lines sub)
+          (subway-lines-interna (get-subway-lines sub) fn)
           (get-subway-drivers sub))))
 
+;; Req 24. TDA subway - Modificador: Función que permite modificar el tiempo de parada de una estación. No usar recursividad.
 
 
 
+
+
+;; (subway-train-path force (lazy (fn-subway-train-path arg1 arg2 ...)))
 
 
 ;Estaciones L1 simplificada metro santiago
@@ -410,10 +414,14 @@ l2e
 ;Expresado subway como string
 ;(subway->string sw0c)
 ;sw0c
-(define sw0d (subway-rise-section-cost sw0c))
+;(get-subway-lines sw0c)
+;(define sw0d (subway-lines-interna (get-subway-lines sw0c) (lambda (c) (* c 1.3))))
 ;sw0d
-(get-subway-lines sw0c)
+sw0c
+;(get-subway-lines sw0c)
+(define sw0d (subway-rise-section-cost sw0c (lambda (c) (* c 1.3))))
 
+sw0d
 
 #|
 
