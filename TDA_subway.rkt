@@ -17,7 +17,7 @@
 ;; TDA: SELECTOR - Funcion adicional que permite obtener los divers de un subway
 ;; DOM: sub (subway)
 ;; REC: lista drivers (driver)
-(define get-subway-drivers (lambda (sub) (last sub)))
+(define get-subway-drivers (lambda (sub) (fourth sub)))
 ;; TDA: SELECTOR - Funcion adicional que permite recorrer las lineas de un subway
 ;; DOM: lista lines (line) X fn (function)
 ;; REC: line (line)

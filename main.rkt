@@ -89,10 +89,11 @@
 ;; REC: line (line)
 (define line-add-section
   (lambda (line section)
-    (list (get-line-id line)
-          (get-line-name line)
-          (get-line-rail-type line)
-          (fn-add-section (get-line-sections line) section))))
+    (list
+     (get-line-id line)
+     (get-line-name line)
+     (get-line-rail-type line)
+     (fn-add-section (get-line-sections line) section))))
 ;; Req 10: Función que permite determinar si un elemento cumple con las restricciones señaladas en apartados anteriores en
 ;; relación a las estaciones y tramos para poder conformar una línea. Ocupar un acumulador
 ;; DOM: line (line)
@@ -131,23 +132,25 @@
 ;; REC: train
 (define train-add-car
   (lambda (train pcar position)
-    (list (get-train-id train)
-          (get-train-maker train)
-          (get-train-rail-type train)
-          (get-train-speed train)
-          (get-train-station-stay-time train)
-          (add-car (get-pcars train) pcar position))))
+    (list
+     (get-train-id train)
+     (get-train-maker train)
+     (get-train-rail-type train)
+     (get-train-speed train)
+     (get-train-station-stay-time train)
+     (add-car (get-pcars train) pcar position))))
 ;; Req 14: Función que permite eliminar un carro desde el convoy
 ;; DOM: train (train) X position (positive-integer U {0})
 ;; REC: train
 (define train-remove-car
   (lambda (train position)
-    (list (get-train-id train)
-          (get-train-maker train)
-          (get-train-rail-type train)
-          (get-train-speed train)
-          (get-train-station-stay-time train)
-          (remove-car (get-pcars train) position))))
+    (list
+     (get-train-id train)
+     (get-train-maker train)
+     (get-train-rail-type train)
+     (get-train-speed train)
+     (get-train-station-stay-time train)
+     (remove-car (get-pcars train) position))))
 ;; Req 15: Función que permite determinar si un elemento es un tren válido, esto es,
 ;; si el elemento tiene la estructura de tren y los carros que lo conforman son compatibles (mismo modelo)
 ;; y tienen una disposición coherente con carros terminales (tr) en los extremos y centrales (ct) en medio del convoy
@@ -226,10 +229,11 @@
 ;; REC: subway
 (define subway-rise-section-cost
   (lambda (sub fn)
-    (list (get-subway-id-and-name sub)
-          (get-subway-trains sub)
-          (subway-lines-interna (get-subway-lines sub) fn)
-          (get-subway-drivers sub))))
+    (list
+     (get-subway-id-and-name sub)
+     (get-subway-trains sub)
+     (subway-lines-interna (get-subway-lines sub) fn)
+     (get-subway-drivers sub))))
 ;; Req 24. TDA subway - Modificador: Función que permite modificar el tiempo de parada de una estación. No usar recursividad.
 ;; DOM: sub (subway) X stationName (String) X time
 ;; REC: subway
@@ -242,8 +246,34 @@
      (get-subway-drivers sub))))
 
 ;; Req 25. TDA subway - Modificador: Función que permite asignar un tren a una línea.
-;; DOM: sub (subway) X trainId (int) X lineID (int)
+;; DOM: sub (subway) X train-id (int) X line-id (int)
 ;; REC: subway
+(define subway-assign-train-to-line
+  (lambda (sub train-id line-id)
+    (cond
+      [(null? (list-tail sub 4))
+       (list
+        (get-subway-id-and-name sub)
+        (filter (lambda (train) (if (not (= train-id (get-train-id train))) #t #f)) (get-subway-trains sub))
+        (get-subway-lines sub)
+        (get-subway-drivers sub)
+        (append
+         (filter (lambda (train) (if (= train-id (get-train-id train)) #t #f)) (get-subway-trains sub))
+         (filter (lambda (line) (if (= line-id (get-line-id line)) #t #f)) (get-subway-lines sub))))]
+      [else (list
+             (get-subway-id-and-name sub)
+             (filter (lambda (train) (if (not (= train-id (get-train-id train))) #t #f)) (get-subway-trains sub))
+             (get-subway-lines sub)
+             (get-subway-drivers sub)
+             (last sub)
+             (append
+              (filter (lambda (train) (if (= train-id (get-train-id train)) #t #f)) (get-subway-trains sub))
+              (filter (lambda (line) (if (= line-id (get-line-id line)) #t #f)) (get-subway-lines sub))))])))
+
+;; Req 26. TDA subway - Modificador. Función que permite asignar un conductor a un tren en un horario de salida determinado considerando estación de partida y de llegada.
+;; DOM: sub (subway) X driverId (int) X trainId (int) X departureTime (String en formato HH:MM:SS de 24 hrs) X departure-station (String) X arrival-station (String)
+;; REC: subway
+
 
 ;; (subway-train-path force (lazy (fn-subway-train-path arg1 arg2 ...)))
 
@@ -426,25 +456,27 @@ l2e
 ;(define sw0d (subway-lines-interna (get-subway-lines sw0c) (lambda (c) (* c 1.3))))
 ;sw0d
 
-sw0c
+;sw0c
 ;Aumentando los costos de las estaciones en un 30%
 (define sw0d (subway-rise-section-cost sw0c (lambda (c) (* c 1.3))))
-sw0d
+;sw0d
 ;Cambiando el tiempo de parada de algunas estaciones
 (define sw0e (subway-set-station-stoptime sw0d "Los Héroes" 180))
 (define sw0f (subway-set-station-stoptime sw0e "San Pablo" 50))
 
-sw0f
+;sw0f
 
+(define sw0g (subway-assign-train-to-line sw0f 0 1))
+;sw0g
+(define sw0h (subway-assign-train-to-line sw0g 2 2))
+sw0h
 #|
 
 
 
-
-
 ;Asignando trenes a líneas
-(define sw0g (subway-assign-train-to-line sw0f 0 1))
-(define sw0h (subway-assign-train-to-line sw0g 2 2))
+
+
 
 ;Asignando conductores a trenes
 (define sw0i (subway-assign-driver-to-train sw0h 0 0 "11:00:00" "San Pablo" "Los Héroes"))
