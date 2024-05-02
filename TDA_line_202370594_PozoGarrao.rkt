@@ -5,7 +5,7 @@
 ;; TDA: SELECTOR - Funcion adicional que permite obtener todas las secciones de una linea
 ;; DOM: line (line)
 ;; REC: sections (sections)
-(define get-line-sections (lambda (line) (last line)))
+(define get-line-sections (lambda (line) (fourth line)))
 ;; TDA: SELECTOR - Funcion adicional que permite obtener el id de una linea
 ;; DOM: line (line)
 ;; REC: id (int)

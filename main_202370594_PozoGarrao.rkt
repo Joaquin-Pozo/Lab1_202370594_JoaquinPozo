@@ -1,10 +1,11 @@
 #lang scheme
-;; Laboratorio 1: Scheme
+;; Universidad de Santiago de Chile
+;; Paradigmas de Programación - Laboratorio N°1: Scheme
 ;; Estudiante: Joaquín Pozo Garrao
 
-(require "TDA_station.rkt" "TDA_line.rkt" "TDA_section.rkt" "TDA_pcar.rkt" "TDA_train.rkt" "TDA_subway.rkt")
+(require "TDA_station.rkt" "TDA_line.rkt" "TDA_section.rkt" "TDA_pcar.rkt" "TDA_train.rkt" "TDA_subway.rkt" "TDA_driver.rkt")
 
-;: Req 2: Funcion constructora de estaciones de metro - TDA Constructor
+;: Req 2. TDA station - constructor: Funcion constructora de estaciones de metro.
 ;: DOM: id (int) X nombre (str) X tipo (str) X tiempo-parada (int)
 ;: REC: station (list)
 (define t 0) ; estacion terminal
@@ -15,23 +16,24 @@
 (define station
   (lambda (id name type stop-time)
     (list id name type stop-time)))
-;: Req 3: Funcion constructora de enlaces entre dos estaciones de metro - TDA Constructor
+;: Req 3. TDA section - constructor: Funcion constructora de enlaces entre dos estaciones de metro.
 ;: DOM: point1 (station) X point2 (station) X distance (positive-number) X cost (positive-number U {0}). 
 ;: REC: section (list)
 (define section
   (lambda (point1 point2 distance cost)
     (list point1 point2 distance cost)))
-;: Req 4: Funcion constructora de una linea de metro - TDA Constructor
+;: Req 4. TDA line - constructor: Función que permite crear una línea de metro.
 ;: DOM: id (int) X name (string) X rail-type (string) X section* (* señala que se pueden agregar 0 o más tramos)
 ;: REC: line (list)
 (define line
   (lambda (id name rail-type . sections)
     (list id name rail-type sections)))
-;; Req 5: Funcion que permite determinar el largo total de una línea (en la unidad de medida expresada en cada tramo)
+;; Req 5. TDA line - otras funciones: Funcion que permite determinar el largo total de una línea (en la unidad de medida expresada en cada tramo).
 ;; DOM: line (line)
 ;; REC: positive-number (int)
 (define line-length (lambda (line) (apply + (map (lambda (section) (get-section-distance section)) (get-line-sections line)))))
-;; Req 6: Función que permite determinar el trayecto entre una estación origen y una final
+;; Req 6. TDA line - otras funciones: Función que permite determinar el trayecto entre una estación origen y una final.
+;; Pueden usar recursividad.
 ;; DOM: line (line) X station1-name (String) X station2-name (String)
 ;; REC: positive-number (int)
 (define line-section-length
@@ -52,7 +54,7 @@
           [else
            (fn-interna (cdr line-sections) station1-name station2-name acc indicador)])))
     (fn-interna (get-line-sections line) station1-name station2-name 0 0)))
-;; Req 7: Función que permite determinar el costo total (monetario) de recorrer una línea. Resolver con recursividad natural.
+;; Req 7. TDA line - otras funciones: Función que permite determinar el costo total (monetario) de recorrer una línea. Resolver con recursividad natural.
 ;; DOM: line (line)
 ;; REC: positive-number U {0}
 (define line-cost
@@ -63,8 +65,8 @@
             0
             (+ (get-section-cost (get-first-line-section line-sections)) (fn-interna (cdr line-sections))))))
     (fn-interna (get-line-sections line))))
-;; Req 8: Función que permite determinar el costo de un trayecto entre una estación origen y una final. Resolver con recursividad de cola.
-;; DOM: line (line) X station1-name (String) X station2-name (String)
+;; Req 8. TDA line - otras funciones: Función que permite determinar el costo de un trayecto entre una estación origen y una final. Resolver con recursividad de cola.
+;; DOM: line (line) X station1-name (String) X station2-name (String). Resolver con recursividad de cola.
 ;; REC: positive-number U {0}
 (define line-section-cost
   (lambda (line station1-name station2-name)
@@ -84,7 +86,8 @@
           [else
            (fn-interna (cdr line-sections) station1-name station2-name acc indicador)])))
     (fn-interna (get-line-sections line) station1-name station2-name 0 0)))
-;; Req 9: Función que permite añadir tramos a una línea. Resolver con recursividad natural.
+;; Req 9. TDA line - modificador: Función que permite añadir tramos a una línea. Resolver con recursividad natural.
+;; Verifica al momento de incorporar un tramo si éste está duplicado.
 ;; DOM: line (line) X section (section)
 ;; REC: line (line)
 (define line-add-section
@@ -94,8 +97,8 @@
      (get-line-name line)
      (get-line-rail-type line)
      (fn-add-section (get-line-sections line) section))))
-;; Req 10: Función que permite determinar si un elemento cumple con las restricciones señaladas en apartados anteriores en
-;; relación a las estaciones y tramos para poder conformar una línea. Ocupar un acumulador
+;; Req 10. TDA Línea - pertenencia: Función que permite determinar si un elemento cumple con las restricciones señaladas en apartados anteriores en
+;; relación a las estaciones y tramos para poder conformar una línea. Ocupar un acumulador. Emplear algún tipo de recursividad.
 ;; DOM: line (line)
 ;; REC: #t | #f (boolean)
 (define line?
@@ -103,8 +106,8 @@
     (if (duplicated-sections? (get-line-sections line))
         #t
         #f)))
-;; Req 11: Función que permite crear los carros de pasajeros que conforman un convoy. Los carros pueden ser de
-;; tipo terminal (tr) o central (ct)
+;; Req 11. TDA pcar - Constructor: Función que permite crear los carros de pasajeros que conforman un convoy. Los carros pueden ser de
+;; tipo terminal (tr) o central (ct).
 ;; DOM: id (int) X capacity (positive integer) X model (string) X type (car-type)
 ;; REC: pcar
 (define tr "terminal")
@@ -113,7 +116,7 @@
 (define pcar
   (lambda (id capacity model type)
     (list id capacity model type)))
-;; Req 12: Función que permite crear un tren o convoy
+;; Req 12. TDA train - Constructor: Función que permite crear un tren o convoy.
 ;; DOM: id (int) X maker (string) X rail-type (string) X speed (positive number) X station-stay-time (positive number U {0}) X pcar*
 ;; REC: train
 (define train
@@ -127,7 +130,8 @@
       [(and (same-models? (get-pcar-models pcar)) (correct-order? (get-pcar-types pcar)))
        (list id maker rail-type speed station-stay-time pcar)]
       [else (list id maker rail-type speed station-stay-time null)])))
-;; Req 13: Función que permite añadir carros a un tren en una posición dada
+;; Req 13. TDA train - Modificador: Función que permite añadir carros a un tren en una posición dada.
+;; Emplear algún tipo de recursividad. 
 ;; DOM: train (train) X pcar (pcar) X position (positive-integer U {0})
 ;; REC: train
 (define train-add-car
@@ -139,7 +143,8 @@
      (get-train-speed train)
      (get-train-station-stay-time train)
      (add-car (get-pcars train) pcar position))))
-;; Req 14: Función que permite eliminar un carro desde el convoy
+;; Req 14. TDA train - Modificador: Función que permite eliminar un carro desde el convoy.
+;; Emplear algún tipo de recursividad.
 ;; DOM: train (train) X position (positive-integer U {0})
 ;; REC: train
 (define train-remove-car
@@ -151,9 +156,10 @@
      (get-train-speed train)
      (get-train-station-stay-time train)
      (remove-car (get-pcars train) position))))
-;; Req 15: Función que permite determinar si un elemento es un tren válido, esto es,
+;; Req 15. TDA train - Pertenencia: Función que permite determinar si un elemento es un tren válido, esto es,
 ;; si el elemento tiene la estructura de tren y los carros que lo conforman son compatibles (mismo modelo)
-;; y tienen una disposición coherente con carros terminales (tr) en los extremos y centrales (ct) en medio del convoy
+;; y tienen una disposición coherente con carros terminales (tr) en los extremos y centrales (ct) en medio del convoy.
+;; Emplear algún tipo de recursividad.
 ;; DOM: train
 ;; REC: boolean
 (define train?
@@ -167,7 +173,7 @@
                      (correct-order? (get-pcar-types (get-pcars train))))
                 #t
                 #f)))))
-;; Req 16: Función que permite determinar la capacidad máxima de pasajeros del tren
+;; Req 16. TDA train - Otras funciones: Función que permite determinar la capacidad máxima de pasajeros del tren. Emplear algún tipo de recursividad.
 ;; DOM: train
 ;; REC: positive-number U {0}
 (define train-capacity
@@ -178,19 +184,19 @@
           [(null? train-pcars) 0]
           [(+ (get-pcar-capacity (car train-pcars)) (fn-interna (cdr train-pcars)))])))
     (fn-interna (get-pcars train))))
-;; Req 17: Función que permite crear un conductor cuya habilitación de conducción depende del fabricante de tren (train-maker)
+;; Req 17. TDA driver - Constructor: Función que permite crear un conductor cuya habilitación de conducción depende del fabricante de tren (train-maker).
 ;; DOM: id (int) X nombre (string) X train-maker (string)
 ;; REC: driver
 (define driver
   (lambda (id name train-maker)
     (list id name train-maker)))
-;; Req 18: Función que permite crear una red de metro
+;; Req 18. TDA subway - Constructor: Función que permite crear una red de metro.
 ;; DOM: id (int) X nombre (string)
 ;; REC: subway
 (define subway
   (lambda (id name)
     (list id name)))
-;; Req 19: Función que permite añadir trenes a una red de metro. Emplear algún tipo de recursividad.
+;; Req 19. TDA subway - Modificador: Función que permite añadir trenes a una red de metro. Emplear algún tipo de recursividad.
 ;; DOM: sub (subway) X train+ (pueden ser 1 o más trenes)
 ;; REC: subway
 (define subway-add-train
@@ -201,13 +207,13 @@
           [(null? train+) (list sub (reverse acc))]
           [else (fn-interna sub (cdr train+) (cons (car train+) acc))])))
     (fn-interna sub train+ null)))
-;; Req 20: Función que permite añadir líneas a una red de metro. No usar recursividad.
+;; Req 20. TDA subway - Modificador: Función que permite añadir líneas a una red de metro. No usar recursividad.
 ;; DOM: sub (subway) X line+ (pueden ser 1 o más líneas)
 ;; REC: subway
 (define subway-add-line
   (lambda (sub . line+)
-    (apply append sub (list (list line+)))))
-;; Req 21: Función que permite añadir conductores a una red de metro. No usar recursividad.
+    (apply append sub (list (list (filter (lambda (line) (line? line)) line+))))))
+;; Req 21. TDA subway - Modificador: Función que permite añadir conductores a una red de metro. No usar recursividad.
 ;; DOM: sub (subway) X driver+ (pueden ser 1 o más conductores)
 ;; REC: subway
 (define subway-add-driver
@@ -221,8 +227,8 @@
     (cond
       [(null? sub) ""]
       [(pair? (car sub)) (string-append (subway->string (car sub)) " " (subway->string (cdr sub)))]
-      [(null? (rest sub)) (format "~a" (first sub))]
-      [else (string-append (format "~a" (first sub)) " " (subway->string (rest sub)))])))
+      [(null? (cdr sub)) (format "~a" (first sub))]
+      [else (string-append (format "~a" (first sub)) " " (subway->string (cdr sub)))])))
 ;; Req 23. TDA subway - Modificador: Función que permite aumentar o reducir los costos de todos los tramos en base a una función especificada por el
 ;; usuario que arroja un cambio porcentual en los costos. No usar recursividad. Considere que las funciones de costo deben ser currificadas.
 ;; DOM: sub (subway) X function
@@ -244,35 +250,30 @@
      (get-subway-trains sub)
      (subway-lines-interna-2 (get-subway-lines sub) station-name time)
      (get-subway-drivers sub))))
-
 ;; Req 25. TDA subway - Modificador: Función que permite asignar un tren a una línea.
 ;; DOM: sub (subway) X train-id (int) X line-id (int)
 ;; REC: subway
 (define subway-assign-train-to-line
   (lambda (sub train-id line-id)
-    (cond
-      [(null? (list-tail sub 4))
-       (list
-        (get-subway-id-and-name sub)
-        (filter (lambda (train) (if (not (= train-id (get-train-id train))) #t #f)) (get-subway-trains sub))
-        (get-subway-lines sub)
-        (get-subway-drivers sub)
-        (append
-         (filter (lambda (train) (if (= train-id (get-train-id train)) #t #f)) (get-subway-trains sub))
-         (filter (lambda (line) (if (= line-id (get-line-id line)) #t #f)) (get-subway-lines sub))))]
-      [else (list
-             (get-subway-id-and-name sub)
-             (filter (lambda (train) (if (not (= train-id (get-train-id train))) #t #f)) (get-subway-trains sub))
-             (get-subway-lines sub)
-             (get-subway-drivers sub)
-             (last sub)
-             (append
-              (filter (lambda (train) (if (= train-id (get-train-id train)) #t #f)) (get-subway-trains sub))
-              (filter (lambda (line) (if (= line-id (get-line-id line)) #t #f)) (get-subway-lines sub))))])))
-
+    (if (and (member train-id (map (lambda (train) (get-train-id train)) (get-subway-trains sub)))
+             (member line-id (map (lambda (line) (get-line-id line)) (get-subway-lines sub))))
+        (list
+         (get-subway-id-and-name sub)
+         (get-subway-trains sub)
+         (map (lambda (line) (assign-train-id-to-line line train-id line-id)) (get-subway-lines sub))
+         (get-subway-drivers sub))
+        (list
+         (get-subway-id-and-name sub)
+         (get-subway-trains sub)
+         (get-subway-lines sub)
+         (get-subway-drivers sub)))))
 ;; Req 26. TDA subway - Modificador. Función que permite asignar un conductor a un tren en un horario de salida determinado considerando estación de partida y de llegada.
-;; DOM: sub (subway) X driverId (int) X trainId (int) X departureTime (String en formato HH:MM:SS de 24 hrs) X departure-station (String) X arrival-station (String)
+;; DOM: sub (subway) X driverId (int) X train-id (int) X departure-time (String en formato HH:MM:SS de 24 hrs) X departure-station (String) X arrival-station (String)
 ;; REC: subway
+
+
+
+
 
 
 ;; (subway-train-path force (lazy (fn-subway-train-path arg1 arg2 ...)))
@@ -464,13 +465,21 @@ l2e
 (define sw0e (subway-set-station-stoptime sw0d "Los Héroes" 180))
 (define sw0f (subway-set-station-stoptime sw0e "San Pablo" 50))
 
-;sw0f
+sw0f
 
 (define sw0g (subway-assign-train-to-line sw0f 0 1))
-;sw0g
-(define sw0h (subway-assign-train-to-line sw0g 2 2))
-sw0h
+sw0g
 #|
+(define sw0h (subway-assign-train-to-line sw0g 2 2))
+;sw0h
+
+(get-train-id (first (first (get-subway-routes sw0h))))
+
+
+;Asignando conductores a trenes
+(define sw0i (subway-assign-driver-to-train sw0h 0 0 "11:00:00" "San Pablo" "Los Héroes"))
+(define sw0j (subway-assign-driver-to-train sw0i 2 2 "12:00:00" "El Llano" "Toesca"))
+
 
 
 
@@ -478,9 +487,7 @@ sw0h
 
 
 
-;Asignando conductores a trenes
-(define sw0i (subway-assign-driver-to-train sw0h 0 0 "11:00:00" "San Pablo" "Los Héroes"))
-(define sw0j (subway-assign-driver-to-train sw0i 2 2 "12:00:00" "El Llano" "Toesca"))
+
 
 ;preguntando dónde está el tren
 (where-is-train sw0j 0 "11:12:00")  ;Debería estar mas cerca de Las Rejas. Hasta esta hora el tren debería haber recorrido 12km (asumiendo esta unidad), sumando los tiempos de parada en las estaciones

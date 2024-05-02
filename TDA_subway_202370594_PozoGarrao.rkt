@@ -1,6 +1,6 @@
 #lang scheme
 (require "TDA_line.rkt" "TDA_section.rkt" "TDA_station.rkt")
-(provide get-subway-id-and-name get-subway-trains get-subway-lines get-subway-drivers subway-lines-interna subway-lines-interna-2)
+(provide get-subway-id-and-name get-subway-trains get-subway-lines get-subway-drivers get-subway-routes subway-lines-interna subway-lines-interna-2 assign-train-id-to-line)
 
 ;; TDA: SELECTOR - Funcion adicional que permite obtener el nombre y id de un subway
 ;; DOM: sub (subway)
@@ -18,6 +18,10 @@
 ;; DOM: sub (subway)
 ;; REC: lista drivers (driver)
 (define get-subway-drivers (lambda (sub) (fourth sub)))
+;; TDA: SELECTOR - Funcion adicional que permite obtener los recorridos de un subway
+;; DOM: sub (subway)
+;; REC: lista routes (routes)
+(define get-subway-routes (lambda (sub) (last sub)))
 ;; TDA: SELECTOR - Funcion adicional que permite recorrer las lineas de un subway
 ;; DOM: lista lines (line) X fn (function)
 ;; REC: line (line)
@@ -82,6 +86,18 @@
               (get-station-name station)
               (get-station-type station)
               (get-station-stop-time station)))))
+;; TDA: MODIFICADOR - Funcion adicional que permite cambiar el tiempo de parada de una estacion
+;; DOM: seccion (section) X station-name (string) X new-time (integer)
+;; REC: station (station)
+(define assign-train-id-to-line
+  (lambda (line train-id line-id)
+        (if (= line-id (get-line-id line))
+            (list
+             (get-line-id line)
+             (get-line-name line)
+             (get-line-rail-type line)
+             (append (get-line-sections line) (list train-id)))
+            line)))
 
 
 
