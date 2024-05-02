@@ -1,6 +1,6 @@
 #lang scheme
-(require "TDA_section.rkt")
-(provide get-line-sections get-line-id get-line-name get-line-rail-type get-first-line-section fn-add-section duplicated-sections?)
+(require "TDA_section_202370594_PozoGarrao.rkt")
+(provide get-line-sections get-line-id get-line-name get-line-rail-type get-train-assigned-to-line get-first-line-section fn-add-section duplicated-sections?)
 
 ;; TDA: SELECTOR - Funcion adicional que permite obtener todas las secciones de una linea
 ;; DOM: line (line)
@@ -18,6 +18,10 @@
 ;; DOM: line (line)
 ;; REC: rail-type (string)
 (define get-line-rail-type (lambda (line) (third line)))
+;; TDA: SELECTOR - Funcion adicional que permite obtener el tren asignado a una linea
+;; DOM: section (section)
+;; REC: train-id (int)
+(define get-train-assigned-to-line (lambda (section) (last section)))
 ;; TDA: SELECTOR - Funcion adicional que permite obtener la primera sección de una linea
 ;; DOM: sections (list)
 ;; REC: section (section)

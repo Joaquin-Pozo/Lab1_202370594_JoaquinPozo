@@ -1,5 +1,5 @@
 #lang scheme
-
+(require "main_202370594_PozoGarrao.rkt")
 ;Estaciones L1 simplificada metro santiago
 (define e0 (station 0 "San Pablo" t 90))
 (define e1 (station 1 "Neptuno" r 45))
@@ -57,7 +57,7 @@
 (define s21 (section e22 e10 4.2 16))
 (define s22 (section e10 e23 4.2 16))
 (define s23 (section e23 e24 4.2 16))
-(define s24 (section e24 e18 28 90))excepcion
+(define s24 (section e24 e18 28 90));excepcion
 
 ;Creación de Línea 1 con todos los tramos
 (define l1 (line 1 "Línea 1" "UIC 60 ASCE" s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 s14 s15))
@@ -66,11 +66,11 @@
 
 (line-length l1) ;resultado debe ser 64,3 si considera inclusive los tramos hacia estaciones de mantenimiento 
 (line-length l2) ;resultado debe ser 0
-(line-section-length l1 “San Pablo” “Las Rejas”)   ;respuesta es 9.5
+(line-section-length l1 "San Pablo" "Las Rejas")   ;respuesta es 9.5
 
 (line-cost l1) ;resultado debe ser 246 si considera inclusive los tramos hacia estaciones de mantenimiento 
 (line-cost l2) ;resultado debe ser 0
-(line-section-cost l1 “San Pablo” “Las Rejas”)     ;respuesta es 39
+(line-section-cost l1 "San Pablo" "Las Rejas")     ;respuesta es 39
 
 ;añadiendo tramos a l2
 (define l2a (line-add-section l2 s17))
@@ -178,6 +178,7 @@
 (define sw0g (subway-assign-train-to-line sw0f 0 1))
 (define sw0h (subway-assign-train-to-line sw0g 2 2))
 
+#|
 ;Asignando conductores a trenes
 (define sw0i (subway-assign-driver-to-train sw0h 0 0 "11:00:00" "San Pablo" "Los Héroes"))
 (define sw0j (subway-assign-driver-to-train sw0i 2 2 "12:00:00" "El Llano" "Toesca"))
@@ -188,3 +189,4 @@
 
 ;produciendo la ruta que sigue el tren
 (subway-train-path sw0j 0 “11:30:00”)
+|#

@@ -1,5 +1,5 @@
 #lang scheme
-(require "TDA_station.rkt")
+(require "TDA_station_202370594_PozoGarrao.rkt")
 (provide get-section-distance get-section-cost get-station1 get-station2 station-name-duplicated? station-id-duplicated?)
 
 ;; TDA: SELECTOR - Funcion adicional que permite obtener la distancia de una sección

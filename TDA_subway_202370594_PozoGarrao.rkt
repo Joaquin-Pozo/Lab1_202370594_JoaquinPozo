@@ -1,6 +1,6 @@
 #lang scheme
-(require "TDA_line.rkt" "TDA_section.rkt" "TDA_station.rkt")
-(provide get-subway-id-and-name get-subway-trains get-subway-lines get-subway-drivers get-subway-routes subway-lines-interna subway-lines-interna-2 assign-train-id-to-line)
+(require "TDA_line_202370594_PozoGarrao.rkt" "TDA_section_202370594_PozoGarrao.rkt" "TDA_station_202370594_PozoGarrao.rkt")
+(provide get-subway-id-and-name get-subway-trains get-subway-lines get-subway-drivers subway-lines-interna subway-lines-interna-2 assign-train-id-to-line assign-driver-to-train)
 
 ;; TDA: SELECTOR - Funcion adicional que permite obtener el nombre y id de un subway
 ;; DOM: sub (subway)
@@ -18,10 +18,6 @@
 ;; DOM: sub (subway)
 ;; REC: lista drivers (driver)
 (define get-subway-drivers (lambda (sub) (fourth sub)))
-;; TDA: SELECTOR - Funcion adicional que permite obtener los recorridos de un subway
-;; DOM: sub (subway)
-;; REC: lista routes (routes)
-(define get-subway-routes (lambda (sub) (last sub)))
 ;; TDA: SELECTOR - Funcion adicional que permite recorrer las lineas de un subway
 ;; DOM: lista lines (line) X fn (function)
 ;; REC: line (line)
@@ -86,9 +82,9 @@
               (get-station-name station)
               (get-station-type station)
               (get-station-stop-time station)))))
-;; TDA: MODIFICADOR - Funcion adicional que permite cambiar el tiempo de parada de una estacion
-;; DOM: seccion (section) X station-name (string) X new-time (integer)
-;; REC: station (station)
+;; TDA: MODIFICADOR - Funcion adicional que permite asignar el id de un tren a una linea
+;; DOM: line (line) X train-id (int) X line-id (int)
+;; REC: line (line)
 (define assign-train-id-to-line
   (lambda (line train-id line-id)
         (if (= line-id (get-line-id line))
@@ -96,9 +92,29 @@
              (get-line-id line)
              (get-line-name line)
              (get-line-rail-type line)
-             (append (get-line-sections line) (list train-id)))
+             (append (get-line-sections line) (list (list train-id))))
             line)))
-
+;; TDA: MODIFICADOR - Funcion adicional que permite agregar un driver-id, departure-time, departure-station y arrival-station a un train
+;; DOM: line (line) X driver-id (int) X train-id (int) X departure-time (String en formato HH:MM:SS de 24 hrs) X departure-station (String) X arrival-station (String)
+;; REC: line (line)
+(define assign-driver-to-train
+  (lambda (line driver-id train-id departure-time departure-station arrival-station)
+    (if (= train-id (first (get-train-assigned-to-line (get-line-sections line))))
+        (list
+         (get-line-id line)
+         (get-line-name line)
+         (get-line-rail-type line)
+         (add-driver (get-line-sections line) driver-id departure-time departure-station arrival-station null))
+        line)))
+;; TDA: MODIFICADOR - Funcion adicional que permite agregar un driver-id, departure-time, departure-station y arrival-station a un train
+;; DOM: sections (sections) X driver-id (int) X train-id (int) X departure-time (String en formato HH:MM:SS de 24 hrs) X departure-station (String) X arrival-station (String)
+;; REC: section (sections)
+(define add-driver
+  (lambda (sections driver-id departure-time departure-station arrival-station acc)
+    (cond
+      [(null? sections) null]
+      [(null? (cdr sections)) (append (reverse acc) (list (append (car sections) (list driver-id departure-time departure-station arrival-station))))]
+      [(add-driver (cdr sections) driver-id departure-time departure-station arrival-station (cons (car sections) acc))])))
 
 
 

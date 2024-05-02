@@ -3,7 +3,12 @@
 ;; Paradigmas de Programación - Laboratorio N°1: Scheme
 ;; Estudiante: Joaquín Pozo Garrao
 
-(require "TDA_station.rkt" "TDA_line.rkt" "TDA_section.rkt" "TDA_pcar.rkt" "TDA_train.rkt" "TDA_subway.rkt" "TDA_driver.rkt")
+(require "TDA_station_202370594_PozoGarrao.rkt" "TDA_line_202370594_PozoGarrao.rkt" "TDA_section_202370594_PozoGarrao.rkt"
+         "TDA_pcar_202370594_PozoGarrao.rkt" "TDA_train_202370594_PozoGarrao.rkt" "TDA_subway_202370594_PozoGarrao.rkt" "TDA_driver_202370594_PozoGarrao.rkt")
+
+(provide station section line line-length line-section-length line-cost line-section-cost line-add-section line? pcar train train-add-car train-remove-car
+         train? train-capacity driver subway subway-add-train subway-add-line subway-add-driver subway->string subway-rise-section-cost subway-set-station-stoptime
+         subway-assign-train-to-line t c r m tr ct)
 
 ;: Req 2. TDA station - constructor: Funcion constructora de estaciones de metro.
 ;: DOM: id (int) X nombre (str) X tipo (str) X tiempo-parada (int)
@@ -268,13 +273,21 @@
          (get-subway-lines sub)
          (get-subway-drivers sub)))))
 ;; Req 26. TDA subway - Modificador. Función que permite asignar un conductor a un tren en un horario de salida determinado considerando estación de partida y de llegada.
-;; DOM: sub (subway) X driverId (int) X train-id (int) X departure-time (String en formato HH:MM:SS de 24 hrs) X departure-station (String) X arrival-station (String)
+;; DOM: sub (subway) X driver-id (int) X train-id (int) X departure-time (String en formato HH:MM:SS de 24 hrs) X departure-station (String) X arrival-station (String)
 ;; REC: subway
-
-
-
-
-
+(define subway-assign-driver-to-train
+  (lambda (sub driver-id train-id departure-time departure-station arrival-station)
+    (if (member train-id (map (lambda (line) (first (get-train-assigned-to-line (get-line-sections line)))) (get-subway-lines sub)))
+        (list
+         (get-subway-id-and-name sub)
+         (get-subway-trains sub)
+         (map (lambda (line) (assign-driver-to-train line driver-id train-id departure-time departure-station arrival-station)) (get-subway-lines sub))
+         (get-subway-drivers sub))
+        (list
+         (get-subway-id-and-name sub)
+         (get-subway-trains sub)
+         (get-subway-lines sub)
+         (get-subway-drivers sub)))))
 
 ;; (subway-train-path force (lazy (fn-subway-train-path arg1 arg2 ...)))
 
@@ -465,21 +478,24 @@ l2e
 (define sw0e (subway-set-station-stoptime sw0d "Los Héroes" 180))
 (define sw0f (subway-set-station-stoptime sw0e "San Pablo" 50))
 
-sw0f
+;sw0f
 
 (define sw0g (subway-assign-train-to-line sw0f 0 1))
-sw0g
-#|
+;sw0g
+
 (define sw0h (subway-assign-train-to-line sw0g 2 2))
 ;sw0h
 
-(get-train-id (first (first (get-subway-routes sw0h))))
-
+;(get-train-id (first (first (get-subway-routes sw0h))))
+sw0h
 
 ;Asignando conductores a trenes
 (define sw0i (subway-assign-driver-to-train sw0h 0 0 "11:00:00" "San Pablo" "Los Héroes"))
 (define sw0j (subway-assign-driver-to-train sw0i 2 2 "12:00:00" "El Llano" "Toesca"))
 
+;sw0i
+sw0j
+#|
 
 
 
