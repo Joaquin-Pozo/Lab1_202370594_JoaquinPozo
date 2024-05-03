@@ -7,11 +7,11 @@
 (define get-pcar-models (lambda (pcar) (map (lambda (x) (third x)) pcar)))
 ;; TDA: SELECTOR - Funcion adicional que permite obtener el/los tipo/s de un/unos pcar/s
 ;; DOM: pcar (pcar)
-;; REC: lista de los modelos de pcars (list)
+;; REC: lista de los tipos de pcars (list)
 (define get-pcar-types (lambda (pcar) (map (lambda (x) (last x)) pcar)))
-;; TDA: SELECTOR - Funcion adicional que permite obtener la capacidad de carro
+;; TDA: SELECTOR - Funcion adicional que permite obtener la capacidad de un carro
 ;; DOM: pcar (pcar)
-;; REC: capacidad del carro (integer)
+;; REC: capacidad del carro (int)
 (define get-pcar-capacity (lambda (pcar) (second pcar)))
 ;; TDA: VERIFICADOR - Funcion adicional que permite validar si los modelos de pcars son compatibles
 ;; DOM: pcar (pcar)
@@ -31,7 +31,6 @@
       [(or (null? pcar-types) (null? (cdr pcar-types))) #t]
       [(equal? (first pcar-types) (second pcar-types)) (all-central? (cdr pcar-types))]
       [else #f])))
-
 ;; TDA: VERIFICADOR - Funcion adicional que permite validar si existe coherencia de orden en los carros
 ;; DOM: pcar-types (list)
 ;; REC: #t | #f (boolean)

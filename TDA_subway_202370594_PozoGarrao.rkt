@@ -14,7 +14,7 @@
 ;; DOM: sub (subway)
 ;; REC: lista lines (line)
 (define get-subway-lines (lambda (sub) (third sub)))
-;; TDA: SELECTOR - Funcion adicional que permite obtener los divers de un subway
+;; TDA: SELECTOR - Funcion adicional que permite obtener los drivers de un subway
 ;; DOM: sub (subway)
 ;; REC: lista drivers (driver)
 (define get-subway-drivers (lambda (sub) (fourth sub)))
@@ -44,13 +44,13 @@
           (get-section-distance section)
           (fn (get-section-cost section)))))
 ;; TDA: SELECTOR - Funcion adicional que permite recorrer las lineas de un subway
-;; DOM: lista lines (line) X station-name (string) X new-time (integer)
+;; DOM: lista lines (line) X station-name (string) X new-time (int)
 ;; REC: line (line)
 (define subway-lines-interna-2
   (lambda (subway-lines station-name new-time)
     (map (lambda (line) (line-interna-2 line station-name new-time)) subway-lines)))
 ;; TDA: SELECTOR - Funcion adicional que permite recorrer las secciones de una linea
-;; DOM: line (line) X station-name (string) X new-time (integer)
+;; DOM: line (line) X station-name (string) X new-time (int)
 ;; REC: line-sections (section)
 (define line-interna-2
   (lambda (line station-name new-time)
@@ -60,7 +60,7 @@
      (get-line-rail-type line)
      (map (lambda (section) (modify-station-stop-time section station-name new-time)) (get-line-sections line)))))
 ;; TDA: MODIFICADOR - Funcion adicional que permite cambiar el tiempo de parada de una estacion
-;; DOM: seccion (section) X station-name (string) X new-time (integer)
+;; DOM: seccion (section) X station-name (string) X new-time (int)
 ;; REC: seccion (section)
 (define modify-station-stop-time
   (lambda (section station-name new-time)
@@ -69,7 +69,7 @@
           (get-section-distance section)
           (get-section-cost section))))
 ;; TDA: MODIFICADOR - Funcion adicional que permite cambiar el tiempo de parada de una estacion
-;; DOM: seccion (section) X station-name (string) X new-time (integer)
+;; DOM: station (station) X station-name (string) X new-time (int)
 ;; REC: station (station)
 (define modifiy-station-stop-time-interna
   (lambda (station station-name new-time)
@@ -94,19 +94,19 @@
              (get-line-rail-type line)
              (append (get-line-sections line) (list (list train-id))))
             line)))
-;; TDA: MODIFICADOR - Funcion adicional que permite agregar un driver-id, departure-time, departure-station y arrival-station a un train
+;; TDA: MODIFICADOR - Funcion adicional que permite asignar un driver-id, departure-time, departure-station y arrival-station a un train
 ;; DOM: line (line) X driver-id (int) X train-id (int) X departure-time (String en formato HH:MM:SS de 24 hrs) X departure-station (String) X arrival-station (String)
 ;; REC: line (line)
 (define assign-driver-to-train
   (lambda (line driver-id train-id departure-time departure-station arrival-station)
-    (if (= train-id (first (get-train-assigned-to-line (get-line-sections line))))
+    (if (eq? train-id (first (get-train-assigned-to-line (get-line-sections line))))
         (list
          (get-line-id line)
          (get-line-name line)
          (get-line-rail-type line)
          (add-driver (get-line-sections line) driver-id departure-time departure-station arrival-station null))
         line)))
-;; TDA: MODIFICADOR - Funcion adicional que permite agregar un driver-id, departure-time, departure-station y arrival-station a un train
+;; TDA: MODIFICADOR - Funcion adicional que permite asignar un driver-id, departure-time, departure-station y arrival-station a un train
 ;; DOM: sections (sections) X driver-id (int) X train-id (int) X departure-time (String en formato HH:MM:SS de 24 hrs) X departure-station (String) X arrival-station (String)
 ;; REC: section (sections)
 (define add-driver
@@ -114,12 +114,4 @@
     (cond
       [(null? sections) null]
       [(null? (cdr sections)) (append (reverse acc) (list (append (car sections) (list driver-id departure-time departure-station arrival-station))))]
-      [(add-driver (cdr sections) driver-id departure-time departure-station arrival-station (cons (car sections) acc))])))
-
-
-
-
-
-
-
-
+      [else (add-driver (cdr sections) driver-id departure-time departure-station arrival-station (cons (car sections) acc))])))

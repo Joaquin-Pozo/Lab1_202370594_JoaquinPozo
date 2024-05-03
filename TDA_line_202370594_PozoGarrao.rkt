@@ -4,7 +4,7 @@
 
 ;; TDA: SELECTOR - Funcion adicional que permite obtener todas las secciones de una linea
 ;; DOM: line (line)
-;; REC: sections (sections)
+;; REC: list of sections
 (define get-line-sections (lambda (line) (fourth line)))
 ;; TDA: SELECTOR - Funcion adicional que permite obtener el id de una linea
 ;; DOM: line (line)
@@ -27,8 +27,8 @@
 ;; REC: section (section)
 (define get-first-line-section (lambda (line-sections) (first line-sections)))
 ;; TDA: MODIFICADOR - Funcion adicional que permite agregar secciones a una línea y comprueba si la sección está duplicada
-;; DOM: lista de sections (list) X new_section (section)
-;; REC: lista de sections (list)
+;; DOM: list of sections X new_section (section)
+;; REC: list of sections
 (define fn-add-section
   (lambda (line-sections section)
     (cond
@@ -37,7 +37,7 @@
        (cons (car line-sections) (fn-add-section (cdr line-sections) null))]
       [else (cons (car line-sections) (fn-add-section (cdr line-sections) section))])))
 ;; TDA: VALIDADOR - Funcion adicional que permite verificar si una linea tiene secciones duplicadas
-;; DOM: lista de sections (list)
+;; DOM: list of sections
 ;; REC: #t | #f (boolean)
 (define duplicated-sections?
   (lambda (line-sections)
